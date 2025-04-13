@@ -13,6 +13,7 @@ obj/
 
 # Visual Studio Code
 .vscode/
+*.code-workspace
 
 # Rider
 .idea/
@@ -39,3 +40,4 @@ artifacts/
 ~$*
 *.tmp
 *.temp
+WavesRP.code-workspace

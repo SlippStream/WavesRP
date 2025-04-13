@@ -1,0 +1,44 @@
+using DiscordRPC;
+using DiscordRPC.Logging;
+
+namespace WavesRP
+{
+    public class DiscordClient
+    {
+        private DiscordRpcClient client;
+        public bool IsRPConnected => client.IsInitialized;
+        public DiscordClient(string appID)
+        {
+            client = new DiscordRpcClient(appID);
+            //Set the logger
+            client.Logger = new ConsoleLogger() { Level = LogLevel.Warning };
+
+            //Subscribe to events
+            client.OnReady += (sender, e) =>
+            {
+                Console.WriteLine("Received Ready from user {0}", e.User.Username);
+            };
+
+            client.OnPresenceUpdate += (sender, e) =>
+            {
+                Console.WriteLine("Received Update! {0}", e.Presence);
+            };
+        }
+        public void ConnectRP()
+        {
+            client.Initialize();
+        }
+        public void DisconnectRP()
+        {
+            client.Deinitialize();
+        }
+        public void ClearPresence()
+        {
+            client.ClearPresence();
+        }
+        public void SetPresence(RichPresence presence)
+        {
+            client.SetPresence(presence);
+        }
+    }
+}

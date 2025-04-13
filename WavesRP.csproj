@@ -9,10 +9,10 @@
 
   <ItemGroup>
     <Reference Include="DiscordRichPresence">
-      <HintPath>DiscordRPC.dll</HintPath>
+      <HintPath>packages/DiscordRPC.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>Newtonsoft.Json.dll</HintPath>
+      <HintPath>packages/Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>
