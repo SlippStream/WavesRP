@@ -1,11 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>0c2c3739-6a0b-4fa3-b4e7-00449d5d14b1</UserSecretsId>
+    <ApplicationIcon>windows.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="windows.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="DiscordRichPresence">

@@ -41,3 +41,5 @@ artifacts/
 *.tmp
 *.temp
 WavesRP.code-workspace
+
+lib/

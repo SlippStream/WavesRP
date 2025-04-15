@@ -7,6 +7,7 @@ namespace WavesRP
     {
         private DiscordRpcClient client;
         public bool IsRPConnected => client.IsInitialized;
+        public bool IsDisposed => client.IsDisposed;
         public DiscordClient(string appID)
         {
             client = new DiscordRpcClient(appID);
@@ -32,6 +33,10 @@ namespace WavesRP
         {
             client.Deinitialize();
         }
+        public void Dispose()
+        {
+            client.Dispose();
+        }
         public void ClearPresence()
         {
             client.ClearPresence();
@@ -40,5 +45,6 @@ namespace WavesRP
         {
             client.SetPresence(presence);
         }
+        public static DiscordClient Instantiate(string appID) => new(appID);
     }
 }
