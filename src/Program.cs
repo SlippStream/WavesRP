@@ -136,7 +136,7 @@ namespace WavesRp
                 },
                 Buttons = [
                     new Button(){
-                        Label = "Listen",
+                        Label = "Listen 🎵",
                         Url = listeningData.TrackUrl
                     },
                     new Button(){
