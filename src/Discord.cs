@@ -22,7 +22,7 @@ namespace WavesRP
 
             client.OnPresenceUpdate += (sender, e) =>
             {
-                Console.WriteLine("Received Update! {0}", e.Presence);
+                Console.WriteLine("Received Update! Listening to {0} by {1}", e.Presence.Details, e.Presence.State);
             };
         }
         public void ConnectRP()

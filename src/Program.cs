@@ -48,6 +48,7 @@ namespace WavesRp
                     if (discord.IsRPConnected)
                     {
                         tidalProcess = null;
+                        discord.ClearPresence();
                     }
                     await Task.Delay(500);
                     continue;
