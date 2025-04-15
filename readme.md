@@ -6,3 +6,7 @@
 
 ## Dependencies
 - [discord-rpc-csharp](https://github.com/Lachee/discord-rpc-csharp) >= v1.3.0
+
+## Installation
+- Extract and Run
+- Open TIDAL and start playing a song
