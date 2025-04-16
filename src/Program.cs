@@ -3,22 +3,23 @@ using System.Diagnostics;
 using System.Reflection;
 using DiscordRPC;
 using WavesRP;
-using WavesRP.Util;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 namespace WavesRp
 {
     public class Program
     {
+        private static readonly Dictionary<string, string> _secretCache = new Dictionary<string, string>();
         static string ARTIST_SONG_DELIMITER = " - ";
-        static async Task Main()
+        static async Task Main(string[] args)
         {
-            EnvReader.Load(Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName + @"\lib\.env");
+            //try { GetSecrets(); } catch (Exception ex) { Console.WriteLine("Cannot get secrets! Exiting..."); Environment.Exit(1); }
+            AppSettings appSettings = GetCurrentSettings();
             Process? tidalProcess = null;
             ListeningData listeningData = new();
-            DiscordClient discord = DiscordClient.Instantiate(Environment.GetEnvironmentVariable("DISCORD_APP_ID") ?? "0");
-            TidalHttpService tidalHttpService = new();
-            Process tempProcess = null;
-            DateTime pauseTime = DateTime.MinValue;
+            DiscordClient discord = DiscordClient.Instantiate(appSettings.DiscordAppId ?? "0");
+            TidalHttpService tidalHttpService = new(appSettings.TidalClientId, appSettings.TidalClientSecret);
 
             while (true)
             {
@@ -33,13 +34,13 @@ namespace WavesRp
                     continue;
                 }
                 //Check for active TIDAL process
-                if (!GetTIDALProcess(out tempProcess))
+                if (!GetTIDALProcess(out Process tempProcess))
                 {
                     if (tidalProcess != null && !string.Empty.Equals(listeningData.SongName))
                     {
                         Console.WriteLine("TIDAL client may be paused. Waiting for unpause...");
                         SetPausedPresence(discord, listeningData);
-                        pauseTime = DateTime.Now;
+                        DateTime pauseTime = DateTime.Now;
                         tidalProcess = await WaitForUnpause(tidalProcess);
                         listeningData.Started = DateTime.Now - (pauseTime - listeningData.Started);
                         continue;
@@ -62,13 +63,21 @@ namespace WavesRp
                 //Connect RP if not connected
                 if (!discord.IsRPConnected) discord.ConnectRP();
 
-                //------------------------Customizing Presence--------------------------------------
+                //Call TIDAL's API if we haven't for this song.
                 if (listeningData == null
                     || listeningData.SongName.Equals(string.Empty)
                     || !(tidalProcess.MainWindowTitle.StartsWith(listeningData.SongName) && tidalProcess.MainWindowTitle.Contains(listeningData.Artists.FirstOrDefault().Name)))
                 {
                     listeningData = await tidalHttpService.SearchFromWindowTitle(tidalProcess.MainWindowTitle, ARTIST_SONG_DELIMITER);
                 }
+
+                //Check for looped song
+                if (listeningData != null && listeningData.Started + listeningData.Duration < DateTime.Now)
+                {
+                    listeningData.Started = DateTime.Now;
+                }
+
+                //If we don't have TIDAL access, display a basic presence
                 if (!tidalHttpService.IsAuthorized)
                 {
                     SetBasicPresence(discord, tidalProcess.MainWindowTitle);
@@ -76,7 +85,6 @@ namespace WavesRp
                 }
 
                 SetRichPresence(discord, listeningData);
-
 
             WAIT:
                 await Task.Delay(1000);
@@ -163,6 +171,28 @@ namespace WavesRp
                 },
                 //Timestamps = Timestamps.FromTimeSpan(listeningData.Duration)
             });
+        }
+        public class AppSettings
+        {
+            public AppSettings(IConfigurationSection section)
+            {
+                TidalClientId = section.GetValue<string>("TIDAL_CLIENT_ID");
+                TidalClientSecret = section.GetValue<string>("TIDAL_CLIENT_SECRET");
+                DiscordAppId = section.GetValue<string>("DISCORD_APP_ID");
+            }
+            public string TidalClientId { get; set; } = string.Empty;
+            public string TidalClientSecret { get; set; } = string.Empty;
+            public string DiscordAppId { get; set; } = string.Empty;
+        }
+        public static AppSettings GetCurrentSettings()
+        {
+            var builder = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddEnvironmentVariables();
+            IConfigurationRoot config = builder.Build();
+
+            var settings = new AppSettings(config.GetSection("ApiKeys"));
+            return settings;
         }
     }
 }

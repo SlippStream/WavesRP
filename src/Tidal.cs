@@ -42,7 +42,7 @@ namespace WavesRP
         private string _accessToken = string.Empty;
         public bool IsAuthorized => _accessToken != string.Empty;
 
-        public TidalHttpService()
+        public TidalHttpService(string clientId, string clientSecret)
         {
             HttpClientHandler handler = new()
             {
@@ -51,7 +51,7 @@ namespace WavesRP
 
             _client = new HttpClient(handler);
 
-            _ = KeepAuthed();
+            _ = KeepAuthed(clientId, clientSecret);
         }
         private class AlbumPopularityComparer : Comparer<Albums_Resource>
         {
@@ -201,11 +201,11 @@ namespace WavesRP
             }
             return await response.Content.ReadFromJsonAsync<T>();
         }
-        public async Task Authorize()
+        public async Task Authorize(string clientId, string clientSecret)
         {
             var res = await PostAsync<TIDAL.ClientCredentialsResponse>("https://auth.tidal.com/v1/oauth2/token?", "grant_type=client_credentials"
                 , new Headers(
-                    ("Authorization", $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("CLIENT_ID") + ":" + Environment.GetEnvironmentVariable("CLIENT_SECRET")))}"),
+                    ("Authorization", $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"))}"),
                     ("Accept", "application/json")
                     )
                 , "application/x-www-form-urlencoded");
@@ -221,11 +221,11 @@ namespace WavesRP
         FAIL_AUTH:
             _accessToken = string.Empty;
         }
-        private async Task KeepAuthed()
+        private async Task KeepAuthed(string clientId, string clientSecret)
         {
             while (true)
             {
-                await Authorize();
+                await Authorize(clientId, clientSecret);
             }
         }
         public class Headers : IEnumerable<(string, string?)>

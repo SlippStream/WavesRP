@@ -10,6 +10,11 @@ namespace WavesRP
         public bool IsDisposed => client.IsDisposed;
         public DiscordClient(string appID)
         {
+            if (appID == null || appID == "0" || appID == string.Empty)
+            {
+                Console.WriteLine("No app ID provided. Exiting...");
+                Environment.Exit(1);
+            }
             client = new DiscordRpcClient(appID);
             //Set the logger
             client.Logger = new ConsoleLogger() { Level = LogLevel.Warning };
